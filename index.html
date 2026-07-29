@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2022 개정 교육과정 동아시아 역사 기행 - 불교 비교 시뮬레이터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        .serif-title {
+            font-family: 'Noto Serif KR', serif;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .tab-btn.active {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #fef3c7;
+            border-color: #f59e0b;
+        }
+        /* Canvas Responsive Styling */
+        canvas {
+            touch-action: none;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            header, nav, #reportDrawer, #singingBowlBtn, #reportDrawerBtn, .no-print {
+                display: none !important;
+            }
+            #sec-planner {
+                display: block !important;
+            }
+            #reportPrintArea {
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- Top Header & Navigation -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 py-3 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
+                    卍
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            2022 개정 교육과정 [동아시아 역사 기행]
+                        </span>
+                    </div>
+                    <h1 class="text-base sm:text-lg font-bold text-amber-100 serif-title">
+                        한·중·일 동아시아 불교 문화유산 & 생태 비교 시뮬레이터
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Live Scrap Report Drawer Toggle Button -->
+                <button id="reportDrawerBtn" onclick="toggleReportDrawer()" class="relative flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-95">
+                    <i class="fa-solid fa-file-pen text-base"></i>
+                    <span class="hidden sm:inline">실시간 보고서</span>
+                    <span id="scrapBadge" class="bg-slate-950 text-amber-300 px-2 py-0.5 rounded-full text-[11px] font-extrabold border border-amber-500/40">0</span>
+                </button>
+
+                <!-- Singing Bowl Web Audio Meditation Button -->
+                <button id="singingBowlBtn" onclick="playSingingBowl()" class="flex items-center space-x-2 bg-slate-800 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 px-3 py-2 rounded-xl text-xs sm:text-sm transition-all shadow-md">
+                    <i class="fa-solid fa-bell text-amber-400 animate-pulse"></i>
+                    <span class="hidden md:inline font-medium">범종 타종 명상</span>
+                </button>
+
+                <!-- Help Button -->
+                <button onclick="openHelpModal()" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Module Navigation Tabs -->
+        <nav class="max-w-7xl mx-auto mt-3 border-t border-slate-800/80 pt-2 flex items-center space-x-2 overflow-x-auto text-xs sm:text-sm">
+            <button id="tab-map-route" onclick="switchTab('map-route')" class="tab-btn active px-4 py-2 rounded-xl border border-transparent font-semibold transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-route"></i>
+                <span>1. 교류 지도 & 구법 기행</span>
+            </button>
+            <button id="tab-architecture" onclick="switchTab('architecture')" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 font-semibold transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-gopuram"></i>
+                <span>2. 삼국 사찰 건축 비교</span>
+            </button>
+            <button id="tab-culture-sim" onclick="switchTab('culture-sim')" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 font-semibold transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-yin-yang"></i>
+                <span>3. 사상·문화 인터랙티브 체험</span>
+            </button>
+            <button id="tab-planner" onclick="switchTab('planner')" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 font-semibold transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <span>4. 수행평가 보고서 워크벤치</span>
+            </button>
+            <button id="tab-quiz" onclick="switchTab('quiz')" class="tab-btn px-4 py-2 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 font-semibold transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>5. 교육과정 성취 퀴즈</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 md:p-8 flex-grow">
+
+        <!-- ================= TAB 1: BUDDHISM EXPEDITION MAP & CITIES ================= -->
+        <section id="sec-map-route" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Map Canvas Interactive Display (8 cols) -->
+                <div class="lg:col-span-8 glass-panel p-5 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">[성취기준 12동역02-02]</span>
+                            <h2 class="text-xl font-bold text-amber-100 serif-title">동아시아 불교 전파 및 구법 승려 길목 탐색</h2>
+                        </div>
+                        <div class="flex space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+                            <button onclick="setMapFilter('all')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-semibold">전체 보기</button>
+                            <button onclick="setMapFilter('silk')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200">실크로드</button>
+                            <button onclick="setMapFilter('sea')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200">바닷길</button>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Map -->
+                    <div class="relative w-full aspect-[16/9] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-inner">
+                        <canvas id="mapCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                        <div class="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-300 flex items-center space-x-3">
+                            <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5"></span>주요 구법 거점</span>
+                            <span class="flex items-center"><span class="w-3 h-0.5 bg-amber-400 border border-dashed border-amber-300 mr-1.5"></span>실크로드/육상</span>
+                            <span class="flex items-center"><span class="w-3 h-0.5 bg-cyan-400 mr-1.5"></span>해상 교류</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- City Detail Panel & Scraper (4 cols) -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div id="cityInfoPanel" class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                        <!-- JS populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eastern Asia Buddhism Triple Comparison Matrix -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
+                <h3 class="text-lg font-bold text-amber-200 serif-title flex items-center">
+                    <i class="fa-solid fa-table-columns text-amber-400 mr-2"></i> 한·중·일 삼국 불교 성격 및 토착화 특징 비교
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                    <!-- Korea -->
+                    <div class="p-4 bg-slate-900/90 rounded-2xl border border-emerald-500/30 space-y-2">
+                        <div class="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                            <span class="font-bold text-emerald-300 text-sm">🇰🇷 한국 불교 (통합 & 호국)</span>
+                            <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] rounded">산지 지형</span>
+                        </div>
+                        <ul class="space-y-1.5 text-slate-300 leading-relaxed">
+                            <li>• <strong>사상적 특징:</strong> 원효의 화쟁(和爭)과 통불교(通佛教) 전통.</li>
+                            <li>• <strong>사회적 역할:</strong> 국가 위기 시 호국 불교(팔만대장경, 승병).</li>
+                            <li>• <strong>건축 생태:</strong> 자연지형을 살린 산사(山寺) 가람 및 오방색 단청.</li>
+                        </ul>
+                    </div>
+                    <!-- China -->
+                    <div class="p-4 bg-slate-900/90 rounded-2xl border border-red-500/30 space-y-2">
+                        <div class="flex items-center justify-between border-b border-red-500/20 pb-2">
+                            <span class="font-bold text-red-300 text-sm">🇨🇳 중국 불교 (한역 & 왕즉불)</span>
+                            <span class="px-2 py-0.5 bg-red-500/20 text-red-300 text-[10px] rounded">대평원 지형</span>
+                        </div>
+                        <ul class="space-y-1.5 text-slate-300 leading-relaxed">
+                            <li>• <strong>사상적 특징:</strong> 경전의 한자 번역(한역) 및 종파 수립(천태, 화엄, 선).</li>
+                            <li>• <strong>사회적 역할:</strong> 황제 권력 강화 ('왕즉불' 사상, 대불 조성).</li>
+                            <li>• <strong>건축 생태:</strong> 정대칭 궁전형 가람, 황색 기와, 대형 석굴.</li>
+                        </ul>
+                    </div>
+                    <!-- Japan -->
+                    <div class="p-4 bg-slate-900/90 rounded-2xl border border-indigo-500/30 space-y-2">
+                        <div class="flex items-center justify-between border-b border-indigo-500/20 pb-2">
+                            <span class="font-bold text-indigo-300 text-sm">🇯🇵 일본 불교 (신불습합 & 젠 미학)</span>
+                            <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[10px] rounded">해양 섬지형</span>
+                        </div>
+                        <ul class="space-y-1.5 text-slate-300 leading-relaxed">
+                            <li>• <strong>사상적 특징:</strong> 고유 신도(神道)와 결합한 신불습합(神佛習合).</li>
+                            <li>• <strong>사회적 역할:</strong> 무사 정권 보호 및 개인 마음 수행(선종).</li>
+                            <li>• <strong>건축 생태:</strong> 물 없이 모래와 바위로 표현한 건산수(枯山水) 정원.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: TEMPLE ARCHITECTURE COMPARISON SIMULATOR ================= -->
+        <section id="sec-architecture" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">[성취기준 12동역01-02]</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-amber-100 serif-title mt-0.5">
+                            한·중·일 사찰 건축 및 생태환경 가상 시뮬레이터
+                        </h2>
+                    </div>
+
+                    <!-- Arch Style Selector Buttons -->
+                    <div class="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 text-xs">
+                        <button onclick="setArchStyle('korea')" id="arch-btn-korea" class="px-3.5 py-2 rounded-xl font-bold transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            🇰🇷 한국 산사 (山寺)
+                        </button>
+                        <button onclick="setArchStyle('china')" id="arch-btn-china" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-slate-200 transition">
+                            🇨🇳 중국 황궁형 (宮殿)
+                        </button>
+                        <button onclick="setArchStyle('japan')" id="arch-btn-japan" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-slate-200 transition">
+                            🇯🇵 일본 건산수 (枯山水)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Canvas Visualizer Container (8 cols) -->
+                    <div class="lg:col-span-8 space-y-3">
+                        <div class="relative w-full aspect-[16/9] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+                            <canvas id="archCanvas" class="w-full h-full block"></canvas>
+
+                            <!-- Overlay Badges -->
+                            <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-bold text-amber-300" id="canvasOverlayTag">
+                                🇰🇷 한국 산사 (山寺) - 자연 지형 조화 & 오방색 단청
+                            </div>
+
+                            <button onclick="toggleArchRotate()" class="absolute top-3 right-3 px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl font-semibold transition">
+                                <i class="fa-solid fa-arrows-rotate mr-1"></i> 시점 전환
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400 text-center">
+                            * 각 국가의 고유 지형(산지/대평원/해양섬) 및 사회 사상에 따라 사찰 구조가 어떻게 변화했는지 비교해보세요.
+                        </p>
+                    </div>
+
+                    <!-- Details & Scraper Box (4 cols) -->
+                    <div class="lg:col-span-4 flex flex-col justify-between glass-panel p-5 rounded-2xl border border-slate-800 space-y-4" id="archDetailBox">
+                        <!-- JS populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: THOUGHT & CULTURE INTERACTIVE SIMS ================= -->
+        <section id="sec-culture-sim" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                <!-- Sub Navigation Bar -->
+                <div class="flex items-center space-x-3 border-b border-slate-800 pb-4 overflow-x-auto">
+                    <button onclick="switchSubSim('wonhyo')" id="sub-wonhyo" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                        🇰🇷 [한국] 원효의 화쟁(和爭) 사상 인터랙티브 노드
+                    </button>
+                    <button onclick="switchSubSim('zen')" id="sub-zen" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-400 hover:text-slate-200 shrink-0">
+                        🇯🇵 [일본] 건산수(枯山水) 젠 정원 갈퀴질 체험
+                    </button>
+                    <button onclick="switchSubSim('sutra')" id="sub-sutra" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-400 hover:text-slate-200 shrink-0">
+                        🇨🇳 [중국] 한역(漢譯) 역경 & 석굴 문화재 탐색
+                    </button>
+                </div>
+
+                <!-- Sub Sim 1: Wonhyo Harmony Interactive Node -->
+                <div id="sim-wonhyo-view" class="space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-amber-200 serif-title">신라 원효의 화쟁(和爭) & 일심(一心) 노드 시뮬레이터</h3>
+                            <p class="text-xs text-slate-400">대립하는 교종과 선종, 공(空)과 유(有)의 교리를 클릭하여 '일심(一心)' 원점으로 융합해보세요.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="triggerWonhyoHarmony()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg shadow-amber-500/20">
+                                <i class="fa-solid fa-arrows-to-circle mr-1"></i> 화쟁(和爭) 원리 융합 실행
+                            </button>
+                            <button onclick="scrapWonhyoSim()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
+                                <i class="fa-solid fa-bookmark mr-1"></i> 노드 스크랩
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full aspect-[16/8] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-inner">
+                        <canvas id="wonhyoCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                    </div>
+                </div>
+
+                <!-- Sub Sim 2: Japanese Zen Garden Raking Simulation -->
+                <div id="sim-zen-view" class="hidden space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-indigo-200 serif-title">일본 가산수(枯山水) 카레스산스이 명상 시뮬레이터</h3>
+                            <p class="text-xs text-slate-400">마우스나 터치 드래그로 흰 모래 위에 물결선 패턴을 그리고 바위를 놓아 정원을 완성하세요.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="clearZenCanvas()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+                                <i class="fa-solid fa-eraser mr-1"></i> 모래 평평히 하기
+                            </button>
+                            <button onclick="scrapZenSim()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
+                                <i class="fa-solid fa-bookmark mr-1"></i> 정원 스크랩
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full aspect-[16/8] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-inner cursor-crosshair">
+                        <canvas id="zenCanvas" class="w-full h-full block"></canvas>
+                        <div class="absolute bottom-3 left-3 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-300">
+                            💡 드래그: 갈퀴로 모래 물결 그리기 | 클릭: 이끼 바위 배치
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub Sim 3: Chinese Sutra Translation & Grotto Explorer -->
+                <div id="sim-sutra-view" class="hidden space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-red-200 serif-title">중국 불교 한역(漢譯) 역경과 3대 석굴 유산 탐색</h3>
+                            <p class="text-xs text-slate-400">범어로 작성된 불경을 동아시아 공통문자인 한자로 번역한 역사적 의미를 확인하세요.</p>
+                        </div>
+                        <button onclick="scrapSutraSim()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
+                            <i class="fa-solid fa-bookmark mr-1"></i> 탐구 스크랩
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2">
+                            <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-bold">돈황 막고굴 (Mogao Caves)</span>
+                            <h4 class="font-bold text-amber-200 text-sm">실크로드의 관문 & 장경동</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">신라 승려 혜초의 &lt;왕오천축국전&gt;이 발견된 세계 최대 벽화·불상 석굴 유적.</p>
+                        </div>
+                        <div class="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2">
+                            <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-bold">운강 석굴 (Yungang Caves)</span>
+                            <h4 class="font-bold text-amber-200 text-sm">북위 황제의 권위 대불</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">'왕즉불' 사상을 기반으로 황제의 얼굴을 형상화한 거대 석굴 대불 조성.</p>
+                        </div>
+                        <div class="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2">
+                            <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-bold">한역(漢譯) 역경원</span>
+                            <h4 class="font-bold text-amber-200 text-sm">구마라습 & 현장의 번역 사업</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">인도 범어 경전을 동아시아 세계에 맞게 한자로 정교하게 번역하여 불교 문화권 형성.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: STUDENT TRAVEL PLANNER & LIVE REPORT WORKBENCH ================= -->
+        <section id="sec-planner" class="tab-content hidden space-y-8">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                <div class="border-b border-slate-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                [수행평가 연계] 시뮬레이션 연동 탐구 보고서 워크벤치
+                            </span>
+                            <span id="reportProgressTag" class="px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                작성 진행률 0%
+                            </span>
+                        </div>
+                        <h2 class="text-2xl font-bold serif-title text-amber-200 mt-1">
+                            동아시아 불교 역사 기행 수행평가 보고서
+                        </h2>
+                        <p class="text-xs text-slate-400">각 탭에서 시뮬레이션을 진행하며 스크랩한 탐구 노드가 아래 보고서 본문에 실시간 연동됩니다.</p>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="autoFillExampleScraps()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-slate-700 transition">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 예시 데이터 자동 채우기
+                        </button>
+                        <button onclick="printReport()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition">
+                            <i class="fa-solid fa-print mr-1"></i> 인쇄 / PDF
+                        </button>
+                        <button id="copyReportBtn" onclick="copyPlannerReport()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition">
+                            <i class="fa-solid fa-copy mr-1"></i> 텍스트 복사
+                        </button>
+                        <button onclick="submitToGoogleSheet()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition">
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> 구글 시트로 제출
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Information Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-400 mb-1">학교명</label>
+                        <input type="text" id="infoSchool" oninput="updateReportView()" placeholder="예: 한국고등학교" class="w-full bg-slate-950 border border-slate-800 text-slate-200 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-400 mb-1">학년/반</label>
+                        <input type="text" id="infoGrade" oninput="updateReportView()" placeholder="예: 2학년 3반" class="w-full bg-slate-950 border border-slate-800 text-slate-200 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-400 mb-1">학번</label>
+                        <input type="text" id="infoNumber" oninput="updateReportView()" placeholder="예: 15번" class="w-full bg-slate-950 border border-slate-800 text-slate-200 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-400 mb-1">이름</label>
+                        <input type="text" id="infoName" oninput="updateReportView()" placeholder="예: 홍길동" class="w-full bg-slate-950 border border-slate-800 text-slate-200 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block font-semibold text-slate-400 mb-1">제출일</label>
+                        <input type="date" id="infoDate" oninput="updateReportView()" class="w-full bg-slate-950 border border-slate-800 text-slate-200 p-2 rounded-lg focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <!-- Main Grid: Left Collected Scraps Panel & Right Live Printable Document View -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Left Column: Scrap Collection Workbench (4 cols) -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-amber-300 flex items-center">
+                                <i class="fa-solid fa-box-archive mr-2"></i> 수집된 탐구 스크랩 노드
+                            </h3>
+                            <button onclick="clearScraps()" class="text-[11px] text-red-400 hover:underline">비우기</button>
+                        </div>
+                        <div id="scrapListContainer" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                            <!-- JS Populated Scrap Cards -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Live Synchronized Document Printable Canvas (8 cols) -->
+                    <div class="lg:col-span-8 bg-slate-950 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-inner space-y-6 text-slate-200 font-sans print:bg-white print:text-black print:p-0" id="reportPrintArea">
+                        <!-- Printable Document Header -->
+                        <div class="border-b-2 border-amber-500/40 pb-4 text-center space-y-2">
+                            <p class="text-xs text-amber-400 font-semibold tracking-wider uppercase">[ 2022 개정 교육과정 동아시아 역사 기행 탐구 보고서 ]</p>
+                            <h2 class="text-xl sm:text-2xl font-bold serif-title text-amber-100" id="reportDocTitle">
+                                동아시아 불교 문화유산 교류 및 생태환경 비교 탐구 보고서
+                            </h2>
+                            <div class="flex flex-wrap justify-center gap-4 text-xs text-slate-400 pt-1">
+                                <span><strong>소속:</strong> <span id="docSchool" class="text-slate-200">미입력</span></span>
+                                <span><strong>학번/성명:</strong> <span id="docStudent" class="text-slate-200">미입력</span></span>
+                                <span><strong>작성일:</strong> <span id="docDate" class="text-slate-200">미입력</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Section 1: Curriculum Motivation & Objective -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center">
+                                <i class="fa-solid fa-bookmark mr-1.5 text-amber-400"></i> I. 탐구 동기 및 관련 성취기준
+                            </h4>
+                            <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
+                                <p><strong>성취기준:</strong> <span class="text-amber-200">[12동역02-02]</span> 종교와 사상을 중심으로 동아시아 각 지역 간 교류 양상을 파악하고, <span class="text-amber-200">[12동역01-02]</span> 생태환경에 바탕을 둔 문화 유산의 지역적 특성을 비교한다.</p>
+                                <textarea id="inputMotivation" oninput="updateReportView()" rows="2" class="w-full mt-2 bg-slate-950/80 border border-slate-800 text-slate-200 p-2 rounded-lg text-xs focus:outline-none focus:border-amber-500" placeholder="탐구 목적 및 동기를 작성하세요..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Integrated Scraped Exploration Notes -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center">
+                                <i class="fa-solid fa-microscope mr-1.5 text-amber-400"></i> II. 시뮬레이션 연동 수집 데이터 (실시간 분석 카드)
+                            </h4>
+                            <div id="docScrapsContainer" class="space-y-2.5 text-xs">
+                                <!-- JS Injected Live Scraps -->
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Synthesis & Comparison Notes -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center">
+                                <i class="fa-solid fa-pen-fancy mr-1.5 text-amber-400"></i> III. 삼국 불교의 생태·사상적 토착화 비교 분석
+                            </h4>
+                            <textarea id="inputAnalysis" oninput="updateReportView()" rows="3" class="w-full bg-slate-900/90 border border-slate-800 text-slate-200 p-3 rounded-xl text-xs leading-relaxed focus:outline-none focus:border-amber-500" placeholder="시뮬레이션을 통해 관찰한 한국(산사/화쟁), 중국(대칭궁전/역경/석굴), 일본(건산수/신불습합) 불교의 차이점을 분석하여 기록하세요..."></textarea>
+                        </div>
+
+                        <!-- Section 4: Reflection & Conclusion -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center">
+                                <i class="fa-solid fa-graduation-cap mr-1.5 text-amber-400"></i> IV. 탐구 결론 및 성찰
+                            </h4>
+                            <textarea id="inputConclusion" oninput="updateReportView()" rows="3" class="w-full bg-slate-900/90 border border-slate-800 text-slate-200 p-3 rounded-xl text-xs leading-relaxed focus:outline-none focus:border-amber-500" placeholder="동아시아 불교 교류가 각 지역 사회 문화에 미친 영향에 대한 나의 종합 소감을 작성하세요..."></textarea>
+                        </div>
+
+                        <!-- Footer Sign -->
+                        <div class="pt-4 border-t border-slate-800 text-right text-[11px] text-slate-500 italic">
+                            2022 개정 교육과정 동아시아 역사 기행 학습 시뮬레이터 검증 보고서
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: CURRICULUM QUIZ ================= -->
+        <section id="sec-quiz" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 max-w-3xl mx-auto">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">[2022 개정 평가 연계]</span>
+                        <h2 class="text-xl font-bold text-amber-100 serif-title mt-0.5">동아시아 불교 역사 점검 퀴즈</h2>
+                    </div>
+                    <span id="quizProgress" class="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">
+                        문제 1 / 5
+                    </span>
+                </div>
+
+                <div id="quizContainer" class="space-y-6">
+                    <!-- JS Populated Quiz Box -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 6: TEACHER DASHBOARD (HIDDEN ADMIN) ================= -->
+        <section id="sec-teacher" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                
+                <!-- Dashboard Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">[교사 전용 관리자 모드]</span>
+                        <h2 class="text-2xl font-bold text-indigo-100 serif-title mt-1 flex items-center">
+                            <i class="fa-solid fa-chalkboard-user mr-2 text-indigo-400"></i> 학급 수행평가 제출 현황 대시보드
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">학생들의 시뮬레이션 참여도, 퀴즈 성적 및 보고서 제출 상태를 관리합니다.</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="https://docs.google.com/spreadsheets/d/1AI23uKM0007_YNCgV1EpKr6KtKLGnbvH7i6H_AxQP_Q/edit?usp=sharing" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center">
+                            <i class="fa-solid fa-table border mr-1"></i> 구글 시트 열기
+                        </a>
+                        <button onclick="downloadStudentDataCSV()" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition hidden sm:inline-block">
+                            <i class="fa-solid fa-file-csv mr-1"></i> CSV 다운로드
+                        </button>
+                        <button onclick="switchTab('map-route')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> 복귀
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Google Sheet Integration Settings -->
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
+                    <div class="flex items-center space-x-2 text-emerald-300 font-bold">
+                        <i class="fa-solid fa-link"></i>
+                        <h3>구글 시트 실시간 연동 설정 (Apps Script)</h3>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        학생들이 [구글 시트로 제출] 버튼을 눌렀을 때 데이터가 선생님의 스프레드시트로 전송되도록 웹앱 URL을 등록해주세요.<br>
+                        (※ 구글 시트 메뉴: 확장 프로그램 > Apps Script > 아래 코드를 복사하여 넣고 '웹앱'으로 배포한 뒤 URL을 입력하세요.)
+                    </p>
+                    
+                    <div class="flex space-x-2">
+                        <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/..." class="flex-grow bg-slate-950 border border-slate-700 text-slate-200 p-2.5 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+                        <button onclick="saveScriptUrl()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition whitespace-nowrap">
+                            URL 저장
+                        </button>
+                    </div>
+                    
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 relative">
+                        <button onclick="copyAppsScriptCode()" class="absolute top-2 right-2 text-slate-400 hover:text-emerald-400 text-xs bg-slate-800 p-1.5 rounded"><i class="fa-solid fa-copy mr-1"></i>코드 복사</button>
+                        <pre id="appsScriptCode" class="text-[11px] text-emerald-200 font-mono overflow-x-auto whitespace-pre">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rowData = [];
+  rowData.push(new Date()); // 제출시간 (A열)
+  rowData.push(e.parameter.school); // 학교 (B열)
+  rowData.push(e.parameter.grade); // 학년반 (C열)
+  rowData.push(e.parameter.number); // 학번 (D열)
+  rowData.push(e.parameter.name); // 이름 (E열)
+  rowData.push(e.parameter.scraps); // 수집노트수 (F열)
+  rowData.push(e.parameter.quizScore); // 퀴즈점수 (G열)
+  rowData.push(e.parameter.motivation); // 탐구동기 (H열)
+  rowData.push(e.parameter.analysis); // 분석 (I열)
+  rowData.push(e.parameter.conclusion); // 결론 (J열)
+  
+  sheet.appendRow(rowData);
+  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+}</pre>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400 font-bold mb-1">총 수강 인원</p>
+                        <p class="text-2xl font-black text-white">25<span class="text-sm font-normal text-slate-500 ml-1">명</span></p>
+                    </div>
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-emerald-900/30 text-center">
+                        <p class="text-xs text-slate-400 font-bold mb-1">보고서 제출 완료</p>
+                        <p class="text-2xl font-black text-emerald-400">18<span class="text-sm font-normal text-slate-500 ml-1">명</span></p>
+                    </div>
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-900/30 text-center">
+                        <p class="text-xs text-slate-400 font-bold mb-1">평균 퀴즈 점수</p>
+                        <p class="text-2xl font-black text-amber-400">84<span class="text-sm font-normal text-slate-500 ml-1">점</span></p>
+                    </div>
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-indigo-900/30 text-center">
+                        <p class="text-xs text-slate-400 font-bold mb-1">평균 시뮬레이션 달성률</p>
+                        <p class="text-2xl font-black text-indigo-400">92<span class="text-sm font-normal text-slate-500 ml-1">%</span></p>
+                    </div>
+                </div>
+
+                <!-- Student List Table (Mock Data) -->
+                <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="text-xs text-slate-400 bg-slate-950/50 uppercase border-b border-slate-800">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">학번/이름</th>
+                                    <th scope="col" class="px-4 py-3">탐구 노트 수집</th>
+                                    <th scope="col" class="px-4 py-3">퀴즈 성적</th>
+                                    <th scope="col" class="px-4 py-3">보고서 제출 상태</th>
+                                    <th scope="col" class="px-4 py-3 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-800 hover:bg-slate-800/30 transition">
+                                    <td class="px-4 py-3 font-semibold text-slate-200">20101 강역사</td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">5개 완료</span></td>
+                                    <td class="px-4 py-3 text-amber-300 font-bold">100점</td>
+                                    <td class="px-4 py-3"><span class="text-emerald-400 font-medium text-xs"><i class="fa-solid fa-check mr-1"></i>제출 완료 (05/24)</span></td>
+                                    <td class="px-4 py-3 text-right"><button onclick="viewMockStudentReport('강역사')" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">보고서 열람</button></td>
+                                </tr>
+                                <tr class="border-b border-slate-800 hover:bg-slate-800/30 transition">
+                                    <td class="px-4 py-3 font-semibold text-slate-200">20102 김동아</td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs">3개 (진행중)</span></td>
+                                    <td class="px-4 py-3 text-amber-300 font-bold">80점</td>
+                                    <td class="px-4 py-3"><span class="text-slate-500 font-medium text-xs"><i class="fa-solid fa-spinner animate-spin mr-1"></i>작성 중</span></td>
+                                    <td class="px-4 py-3 text-right"><button class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">열람 불가</button></td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/30 transition">
+                                    <td class="px-4 py-3 font-semibold text-slate-200">20103 박불교</td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-xs">0개 미참여</span></td>
+                                    <td class="px-4 py-3 text-slate-500 font-bold">미응시</td>
+                                    <td class="px-4 py-3"><span class="text-red-400 font-medium text-xs"><i class="fa-solid fa-xmark mr-1"></i>미제출</span></td>
+                                    <td class="px-4 py-3 text-right"><button class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">독려 알림</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Floating / Slide Live Report Drawer -->
+    <div id="reportDrawer" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700 shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col justify-between">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-file-pen text-amber-400 text-lg"></i>
+                <h3 class="text-base font-bold text-amber-200 serif-title">실시간 보고서 스크랩함</h3>
+            </div>
+            <button onclick="toggleReportDrawer()" class="p-1 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <div class="p-4 flex-grow overflow-y-auto space-y-3" id="drawerScrapList">
+            <!-- JS Injected Drawer Scraps -->
+        </div>
+
+        <div class="p-4 border-t border-slate-800 bg-slate-950/80 space-y-2">
+            <button onclick="switchTab('planner'); toggleReportDrawer();" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
+                <span>수행평가 보고서 전체 편집기 열기</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard Auth Modal -->
+    <div id="teacherAuthModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-sm w-full space-y-5 shadow-2xl transform transition-all scale-100">
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="font-bold text-white text-lg serif-title">교사용 대시보드 인증</h3>
+                <p class="text-xs text-slate-400">관리자 접속 비밀번호를 입력해주세요.</p>
+            </div>
+            
+            <div class="space-y-2">
+                <input type="password" id="teacherPwd" class="w-full bg-slate-950 border border-slate-700 text-white px-4 py-3 rounded-xl text-center focus:outline-none focus:border-indigo-500 tracking-[0.3em] font-mono transition" placeholder="••••••" onkeyup="if(event.key === 'Enter') verifyTeacherAuth()">
+                <p id="teacherAuthError" class="text-xs text-red-400 text-center hidden animate-pulse font-medium">비밀번호가 일치하지 않습니다.</p>
+            </div>
+
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeTeacherAuth()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">취소</button>
+                <button onclick="verifyTeacherAuth()" class="flex-1 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-500/20 transition">인증 및 접속</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Access Link for Teacher -->
+    <footer class="w-full max-w-7xl mx-auto px-4 pb-8 pt-4 mt-8 border-t border-slate-800/60 no-print flex justify-center">
+        <button onclick="openTeacherAuth()" class="group flex items-center space-x-2 text-xs text-slate-500 hover:text-indigo-400 transition bg-slate-900/50 hover:bg-slate-900 px-4 py-2 rounded-xl border border-transparent hover:border-indigo-500/30">
+            <i class="fa-solid fa-chalkboard-user opacity-70 group-hover:opacity-100 transition"></i>
+            <span>교사용 대시보드 로그인</span>
+        </button>
+    </footer>
+
+    <!-- Help & Guide Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-amber-200 text-base serif-title"><i class="fa-solid fa-circle-info mr-2"></i> 시뮬레이터 이용 안내</h3>
+                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+                <p>• <strong>탐구 스크랩:</strong> 지도, 건축, 사상 체험 모듈에서 버튼을 누르면 탐구 내용이 실시간으로 보고서에 자동 수집됩니다.</p>
+                <p>• <strong>보고서 워크벤치:</strong> 스크랩된 노드와 학생 소감을 바탕으로 2022 개정 수행평가 보고서를 인쇄하거나 PDF로 저장할 수 있습니다.</p>
+                <p>• <strong>타종 명상:</strong> 우측 상단의 '범종 타종 명상' 버튼을 누르면 Web Audio 오실레이터 기반의 범종 울림을 청음할 수 있습니다.</p>
+            </div>
+            <button onclick="closeHelpModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">
+                닫기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. STATE & DATA STRUCTURES
+           ========================================================================== */
+        const state = {
+            activeTab: 'map-route',
+            selectedCity: 'changan',
+            mapFilter: 'all',
+            archStyle: 'korea',
+            archRotated: false,
+            subSim: 'wonhyo',
+            quizIndex: 0,
+            quizScore: 0,
+            reportData: {
+                school: '',
+                grade: '',
+                number: '',
+                name: '',
+                date: new Date().toISOString().split('T')[0],
+                motivation: '본 탐구는 2022 개정 교육과정 [동아시아 역사 기행] 과목의 성취기준 [12동역02-02]를 바탕으로, 비단길과 바닷길을 통한 불교 교류 양상 및 한·중·일 삼국의 생태환경에 따른 사찰 건축과 사상적 토착화 특징을 시뮬레이션으로 비교 분석하기 위해 수행되었다.',
+                analysis: '한국은 산지 지형과 어우러진 산사 양식과 원효의 화쟁 사상을 발전시켰으며, 중국은 대평원의 황궁형 정대칭 사찰과 대형 전탑·석굴 유산을 구축했다. 일본은 해양 섬 생태 속에서 모래와 바위로 우주를 표현한 건산수(枯山水) 젠 정원과 신불습합 전통을 창시했음을 확인하였다.',
+                conclusion: '동아시아 불교 전파는 단순한 교리의 모방이 아니라, 각국의 독자적인 지형적 환경과 사회적 통치 이념에 맞춰 창의적으로 변용되고 토착화되었음을 배울 수 있었다.',
+                scraps: []
+            }
+        };
+
+        const citiesData = {
+            changan: {
+                name: "중국 장안 (長安 / Xi'an)",
+                country: "🇨🇳 중국",
+                monk: "현장 (玄奘) / 의정 (義淨)",
+                routeType: "실크로드 (육상 동서 교류)",
+                heritage: "대안탑 (大雁塔), 대흥선사",
+                desc: "인도에서 범어 경전을 구법하여 돌아온 현장이 대안탑을 세우고 경전을 한역(漢譯)한 동아시아 불교 번역 중심지입니다.",
+                point: "한역(漢譯)을 통한 불교 경전의 동아시아 보편화 및 황제 권력 결합",
+                x: 0.38, y: 0.52
+            },
+            dunhuang: {
+                name: "중국 돈황 (敦煌 / Dunhuang)",
+                country: "🇨🇳 중국",
+                monk: "혜초 (慧超) / 구마라습",
+                routeType: "실크로드 오아시스로",
+                heritage: "막고굴 (莫高窟) 장경동",
+                desc: "신라 승려 혜초의 '왕오천축국전'이 발견된 돈황 막고굴은 동서 문화 교류와 석굴 불교 예술의 대단지입니다.",
+                point: "신라 승려 혜초의 천축국 구법 기행 및 석굴 미술 양식의 동전",
+                x: 0.28, y: 0.42
+            },
+            luoyang: {
+                name: "중국 낙양 (洛陽 / Luoyang)",
+                country: "🇨🇳 중국",
+                monk: "가섭마등 / 축법란",
+                routeType: "중원 중심 육상로",
+                heritage: "백마사 (白馬寺), 용문석굴",
+                desc: "중국 최초의 공식 사찰인 백마사와 거대 비로자나불이 각인된 용문석굴이 위치한 북위·당 불교의 요람입니다.",
+                point: "북위 '왕즉불' 사상에 따른 대규모 황제 형상 불상 구축",
+                x: 0.44, y: 0.50
+            },
+            gyeongju: {
+                name: "한국 경주 (金城 / Gyeongju)",
+                country: "🇰🇷 한국",
+                monk: "원효 (元曉) / 의상 (義湘) / 자장",
+                routeType: "해상 및 육상 수용",
+                heritage: "불국사, 석굴암, 황룡사지",
+                desc: "신라 호국불교와 화엄 사상이 꽃피운 왕도입니다. 토함산 지형을 살린 석굴암과 조화로운 가람 배치가 특징입니다.",
+                point: "화쟁(和爭) 사상을 통한 교리 융합 및 신라 산지 지형과 조화된 가람",
+                x: 0.68, y: 0.46
+            },
+            nara: {
+                name: "일본 나라 (平城京 / Nara)",
+                country: "🇯🇵 일본",
+                monk: "감진 (鑑真) / 도쇼",
+                routeType: "남해 해수로 및 견당사",
+                heritage: "동대사 (東大寺 / 토다이지), 당초제사",
+                desc: "중국 당나라 승려 감진이 계율을 전파하고, 성무 천황이 국립 사찰로 동대사 대불을 건립한 아스카·나라 불교의 중심입니다.",
+                point: "율종 전파 및 율령 국가 체제 유지를 위한 호국 대불 건립",
+                x: 0.82, y: 0.48
+            },
+            kyoto: {
+                name: "일본 교토 (平安京 / Kyoto)",
+                country: "🇯🇵 일본",
+                monk: "최澄 (사이초) / 空海 (쿠카이)",
+                routeType: "견당사 해로",
+                heritage: "용안사 (Ryoan-ji), 청수사",
+                desc: "무사 정권 시기 선종(禪宗)이 유행하며 모래와 바위만으로 우주를 정형화한 건산수(枯山水) 젠 정원이 발전했습니다.",
+                point: "신도(神道)와 불교가 결합한 신불습합 및 젠(Zen) 건산수 정원 미학",
+                x: 0.86, y: 0.44
+            }
+        };
+
+        const quizData = [
+            {
+                q: "1. 2022 개정 교육과정에서 강조하는 동아시아 삼국의 불교 전파 방식 중, 범어 경전을 동아시아 공통 문자로 번역하여 교리를 보편화한 과정은?",
+                opts: ["한역(漢譯) 역경 사업", "건산수 정원 조성", "화쟁 사상 선포", "신불습합 융합"],
+                ans: 0,
+                exp: "중국 현장 및 구마라습 등에 의한 한역(漢譯) 사업은 동아시아 한자 문화권 내 불교 수용과 보편화의 결정적 계기가 되었습니다."
+            },
+            {
+                q: "2. 신라 승려 혜초가 인도와 중앙아시아를 기행한 후 남긴 기록으로, 돈황 막고굴 장경동에서 발견된 서적은?",
+                opts: ["삼국유사", "왕오천축국전", "대당서역기", "화엄일승법계도"],
+                ans: 1,
+                exp: "혜초의 <왕오천축국전>은 8세기 인도와 중앙아시아의 정치, 사회, 종교 상황을 증언하는 귀중한 세계사적 사료입니다."
+            },
+            {
+                q: "3. 한국 산사(山寺)의 가람 배치와 건축적 특징으로 가장 올바른 설명은?",
+                opts: ["평야 중심의 완벽한 정대칭 황궁 구조", "자연 산지 지형의 흐름을 살린 배치와 단청 장엄", "물을 일체 쓰지 않고 흰 모래로 물결을 표현", "입구에 신도의 도리이를 설치"],
+                ans: 1,
+                exp: "한국 사찰은 국토의 산지 생태 환경에 맞춰 자연 산세를 훼손하지 않는 가람 배치와 목재 부식을 막는 단청 기법을 발전시켰습니다."
+            },
+            {
+                q: "4. 일본 불교의 독자적 토착화 현상으로, 고유 신앙인 신도(神道)의 신과 불교의 부처가 본래 하나라는 사상은?",
+                opts: ["호국불교", "왕즉불 사상", "신불습합 (神佛習合)", "통불교"],
+                ans: 2,
+                exp: "일본은 고유의 신도(神道) 신들과 불교의 부처를 융합한 '신불습합' 전통을 창시하였습니다."
+            },
+            {
+                q: "5. 신라 원효 대사가 서로 대립하는 교종과 선종, 공(空)과 유(有)의 교리를 하나의 원점에서 융합하고자 제창한 사상은?",
+                opts: ["화쟁 (和爭) 사상", "신불습합", "천태종", "율종"],
+                ans: 0,
+                exp: "원효는 대립하는 여러 학설을 배척하지 않고 더 높은 차원의 '일심(一心)'으로 조화시키는 화쟁(和爭) 논리를 완성했습니다."
+            }
+        ];
+
+        /* ==========================================================================
+           2. TAB SWITCHING & GENERAL UI CONTROL
+           ========================================================================== */
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-slate-400');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+
+            const targetBtn = document.getElementById(`tab-${tabId}`);
+            const targetSec = document.getElementById(`sec-${tabId}`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                targetBtn.classList.remove('text-slate-400');
+            }
+            if (targetSec) targetSec.classList.remove('hidden');
+
+            // Trigger Canvas redraws on view switch
+            setTimeout(() => {
+                if (tabId === 'map-route') drawTravelMap();
+                if (tabId === 'architecture') drawTempleArchitecture();
+                if (tabId === 'culture-sim' && state.subSim === 'wonhyo') drawWonhyoCanvas();
+                if (tabId === 'culture-sim' && state.subSim === 'zen') initZenCanvas();
+            }, 50);
+        }
+
+        function switchSubSim(simId) {
+            state.subSim = simId;
+            ['wonhyo', 'zen', 'sutra'].forEach(s => {
+                const btn = document.getElementById(`sub-${s}`);
+                const view = document.getElementById(`sim-${s}-view`);
+                if (btn) {
+                    btn.className = s === simId ?
+                        "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0" :
+                        "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-400 hover:text-slate-200 shrink-0";
+                }
+                if (view) view.classList.toggle('hidden', s !== simId);
+            });
+
+            setTimeout(() => {
+                if (simId === 'wonhyo') drawWonhyoCanvas();
+                if (simId === 'zen') initZenCanvas();
+            }, 50);
+        }
+
+        /* ==========================================================================
+           3. MAP CANVAS & CITY EXPEDITION LOGIC
+           ========================================================================== */
+        function drawTravelMap() {
+            const canvas = document.getElementById('mapCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 800;
+            canvas.height = rect.height * window.devicePixelRatio || 450;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Background Map Tone
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw Decorative Map Grid Lines
+            ctx.strokeStyle = "rgba(245, 158, 11, 0.08)";
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            // Draw Route Lines
+            // Silk Road
+            ctx.beginPath();
+            ctx.strokeStyle = "#f59e0b";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 4]);
+            ctx.moveTo(citiesData.dunhuang.x * w, citiesData.dunhuang.y * h);
+            ctx.lineTo(citiesData.changan.x * w, citiesData.changan.y * h);
+            ctx.lineTo(citiesData.luoyang.x * w, citiesData.luoyang.y * h);
+            ctx.lineTo(citiesData.gyeongju.x * w, citiesData.gyeongju.y * h);
+            ctx.stroke();
+
+            // Sea Route
+            ctx.beginPath();
+            ctx.strokeStyle = "#06b6d4";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+            ctx.moveTo(citiesData.gyeongju.x * w, citiesData.gyeongju.y * h);
+            ctx.lineTo(citiesData.nara.x * w, citiesData.nara.y * h);
+            ctx.lineTo(citiesData.kyoto.x * w, citiesData.kyoto.y * h);
+            ctx.stroke();
+
+            // Draw City Nodes
+            Object.keys(citiesData).forEach(key => {
+                const city = citiesData[key];
+                const cx = city.x * w;
+                const cy = city.y * h;
+                const isSelected = state.selectedCity === key;
+
+                // Glowing Halo
+                if (isSelected) {
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
+                    ctx.fill();
+                }
+
+                // Core Dot
+                ctx.beginPath();
+                ctx.arc(cx, cy, isSelected ? 9 : 6, 0, Math.PI * 2);
+                ctx.fillStyle = isSelected ? "#f59e0b" : "#e2e8f0";
+                ctx.fill();
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Text Label
+                ctx.fillStyle = isSelected ? "#fef3c7" : "#94a3b8";
+                ctx.font = isSelected ? "bold 13px sans-serif" : "11px sans-serif";
+                ctx.fillText(city.name.split(' ')[1] || city.name, cx + 12, cy + 4);
+            });
+        }
+
+        function selectCity(cityKey) {
+            state.selectedCity = cityKey;
+            drawTravelMap();
+            renderCityInfoPanel();
+        }
+
+        // Attach Map Click Listener
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('mapCanvas');
+            if (canvas) {
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = (e.clientX - rect.left) / rect.width;
+                    const my = (e.clientY - rect.top) / rect.height;
+
+                    let closestKey = null;
+                    let minDist = 0.08;
+
+                    Object.keys(citiesData).forEach(key => {
+                        const city = citiesData[key];
+                        const dist = Math.hypot(city.x - mx, city.y - my);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            closestKey = key;
+                        }
+                    });
+
+                    if (closestKey) {
+                        selectCity(closestKey);
+                    }
+                });
+            }
+        });
+
+        function renderCityInfoPanel() {
+            const panel = document.getElementById('cityInfoPanel');
+            const data = citiesData[state.selectedCity] || citiesData.changan;
+
+            panel.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <span class="text-xs px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">${data.country}</span>
+                            <h3 class="text-xl font-bold text-amber-100 serif-title mt-1">${data.name}</h3>
+                        </div>
+                        <button onclick="scrapCurrentCity()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                            <i class="fa-solid fa-bookmark"></i>
+                            <span>노트 스크랩</span>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2 text-xs sm:text-sm text-slate-300">
+                        <p><strong class="text-amber-300">• 주요 구법 승려:</strong> ${data.monk}</p>
+                        <p><strong class="text-amber-300">• 교류 경로:</strong> ${data.routeType}</p>
+                        <p><strong class="text-amber-300">• 대표 문화유산:</strong> ${data.heritage}</p>
+                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs leading-relaxed text-slate-300 mt-2">
+                            ${data.desc}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3.5 bg-amber-950/30 border border-amber-500/20 rounded-xl text-xs text-amber-200">
+                    <strong class="block text-amber-300 mb-1"><i class="fa-solid fa-graduation-cap mr-1"></i> [2022 개정 학습 탐구 포인트]</strong>
+                    ${data.point}
+                </div>
+            `;
+        }
+
+        function setMapFilter(filter) {
+            state.mapFilter = filter;
+            drawTravelMap();
+        }
+
+        /* ==========================================================================
+           4. TEMPLE ARCHITECTURE CANVAS SIMULATOR
+           ========================================================================== */
+        function setArchStyle(style) {
+            state.archStyle = style;
+            ['korea', 'china', 'japan'].forEach(s => {
+                const btn = document.getElementById(`arch-btn-${s}`);
+                if (btn) {
+                    btn.className = s === style ?
+                        "px-3.5 py-2 rounded-xl font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/30" :
+                        "px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-slate-200 transition";
+                }
+            });
+            drawTempleArchitecture();
+            updateArchDetails();
+        }
+
+        function toggleArchRotate() {
+            state.archRotated = !state.archRotated;
+            drawTempleArchitecture();
+        }
+
+        function drawTempleArchitecture() {
+            const canvas = document.getElementById('archCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 800;
+            canvas.height = rect.height * window.devicePixelRatio || 450;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (state.archStyle === 'korea') {
+                // Korea Mountain Temple
+                // Background Sky & Mountains
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, "#064e3b");
+                grad.addColorStop(1, "#022c22");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Mountain Silhouettes
+                ctx.fillStyle = "#065f46";
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                ctx.lineTo(w * 0.2, h * 0.4);
+                ctx.lineTo(w * 0.5, h * 0.6);
+                ctx.lineTo(w * 0.8, h * 0.3);
+                ctx.lineTo(w, h);
+                ctx.fill();
+
+                // Korea Temple Roof (Curved Curved Anggok)
+                ctx.fillStyle = "#78350f"; // Base Pillars
+                ctx.fillRect(w * 0.35, h * 0.55, w * 0.3, h * 0.25);
+
+                // Dancheong Ornament
+                ctx.fillStyle = "#059669";
+                ctx.fillRect(w * 0.33, h * 0.52, w * 0.34, h * 0.05);
+                ctx.fillStyle = "#dc2626";
+                ctx.fillRect(w * 0.34, h * 0.50, w * 0.32, h * 0.03);
+
+                // Roof Line
+                ctx.fillStyle = "#1e293b";
+                ctx.beginPath();
+                ctx.moveTo(w * 0.25, h * 0.52);
+                ctx.quadraticCurveTo(w * 0.5, h * 0.38, w * 0.75, h * 0.52);
+                ctx.lineTo(w * 0.7, h * 0.42);
+                ctx.quadraticCurveTo(w * 0.5, h * 0.32, w * 0.3, h * 0.42);
+                ctx.closePath();
+                ctx.fill();
+
+            } else if (state.archStyle === 'china') {
+                // China Palace Temple
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, "#7f1d1d");
+                grad.addColorStop(1, "#450a0a");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Red Imperial Pillars
+                ctx.fillStyle = "#b91c1c";
+                ctx.fillRect(w * 0.28, h * 0.5, w * 0.44, h * 0.3);
+
+                // Symmetric Golden Roof
+                ctx.fillStyle = "#eab308";
+                ctx.beginPath();
+                ctx.moveTo(w * 0.2, h * 0.5);
+                ctx.lineTo(w * 0.5, h * 0.25);
+                ctx.lineTo(w * 0.8, h * 0.5);
+                ctx.lineTo(w * 0.75, h * 0.53);
+                ctx.lineTo(w * 0.5, h * 0.32);
+                ctx.lineTo(w * 0.25, h * 0.53);
+                ctx.closePath();
+                ctx.fill();
+
+            } else if (state.archStyle === 'japan') {
+                // Japan Zen Dry Landscape
+                ctx.fillStyle = "#1e1b4b";
+                ctx.fillRect(0, 0, w, h);
+
+                // Zen Sand Ground
+                ctx.fillStyle = "#e2e8f0";
+                ctx.fillRect(0, h * 0.55, w, h * 0.45);
+
+                // Raked Sand Lines
+                ctx.strokeStyle = "#cbd5e1";
+                ctx.lineWidth = 2;
+                for (let y = h * 0.6; y < h; y += 15) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.quadraticCurveTo(w * 0.5, y + 10, w, y);
+                    ctx.stroke();
+                }
+
+                // Zen Moss Rocks
+                ctx.fillStyle = "#334155";
+                ctx.beginPath(); ctx.arc(w * 0.3, h * 0.75, 25, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(w * 0.35, h * 0.78, 15, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#15803d"; // Moss
+                ctx.beginPath(); ctx.arc(w * 0.3, h * 0.73, 10, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        function updateArchDetails() {
+            const box = document.getElementById('archDetailBox');
+            const overlay = document.getElementById('canvasOverlayTag');
+
+            const scrapBtn = `<button onclick="scrapCurrentArch()" class="w-full mt-2 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-bookmark"></i>
+                <span>현재 건축 양식 비교 스크랩</span>
+            </button>`;
+
+            if (state.archStyle === 'korea') {
+                overlay.innerText = '🇰🇷 한국 산사 (山寺) - 산지 지형과의 자연스러운 조화 & 오방색 단청';
+                box.innerHTML = `
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-emerald-300 serif-title">한국 산사의 생태환경적 특징</h3>
+                        <div class="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+                            <p><strong>• 산지 지형과 가람:</strong> 국토의 70%가 산지인 생태환경을 반영하여 산세 흐름을 거스르지 않는 산사(山寺) 양식.</p>
+                            <p><strong>• 앙곡(仰曲)과 단청:</strong> 처마 끝이 들려 올라가며, 목재 부식 방지 및 화엄 장엄을 위해 오방색 단청 시공.</p>
+                            <p><strong>• 유네스코 세계유산:</strong> '산사, 한국의 산지승원' (통도사, 부석사, 법주사 등).</p>
+                        </div>
+                    </div>
+                    ${scrapBtn}
+                `;
+            } else if (state.archStyle === 'china') {
+                overlay.innerText = '🇨🇳 중국 황궁형 사찰 - 대륙 남북 중원 축선 대칭 & 벽돌 전탑';
+                box.innerHTML = `
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-red-300 serif-title">중국 사찰의 생태·정치적 특징</h3>
+                        <div class="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+                            <p><strong>• 정대칭 황궁 구조:</strong> 대평원 농경 지형에 맞춰 남북 중심 축선을 따라 웅장한 대칭 배치.</p>
+                            <p><strong>• 황실 색채 & 전탑:</strong> 황제를 상징하는 황색 기와와 붉은 기둥, 황토를 구워 만든 대형 전탑(磚塔).</p>
+                            <p><strong>• 석굴 예술:</strong> 돈황, 운강, 용문 등 대규모 바위 절벽의 황제 권위 대불상.</p>
+                        </div>
+                    </div>
+                    ${scrapBtn}
+                `;
+            } else if (state.archStyle === 'japan') {
+                overlay.innerText = '🇯🇵 일본 건산수/목조 사찰 - 해양 섬지형 미학 & 신불습합';
+                box.innerHTML = `
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-indigo-300 serif-title">일본 사찰의 생태·문화적 특징</h3>
+                        <div class="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+                            <p><strong>• 카레스산스이(枯山水):</strong> 진짜 물을 쓰지 않고 흰 모래와 이끼 바위로 우주를 그리는 선(禪) 정원.</p>
+                            <p><strong>• 소목(素木)미:</strong> 단청을 배제하고 나뭇결 본래의 무채색 질감을 강조.</p>
+                            <p><strong>• 신불습합 도리이:</strong> 사찰 입구에 일본 고유 신도(神道)의 도리이가 공존.</p>
+                        </div>
+                    </div>
+                    ${scrapBtn}
+                `;
+            }
+        }
+
+        /* ==========================================================================
+           5. THOUGHT SIMULATORS (WONHYO & ZEN GARDEN)
+           ========================================================================== */
+        let wonhyoUnified = false;
+
+        function drawWonhyoCanvas() {
+            const canvas = document.getElementById('wonhyoCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 800;
+            canvas.height = rect.height * window.devicePixelRatio || 400;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(0, 0, w, h);
+
+            const centerX = w / 2;
+            const centerY = h / 2;
+
+            if (!wonhyoUnified) {
+                // Split Nodes
+                drawNode(ctx, centerX - 180, centerY - 60, "교종 (敎宗)", "#3b82f6");
+                drawNode(ctx, centerX + 180, centerY - 60, "선종 (禪宗)", "#ec4899");
+                drawNode(ctx, centerX - 180, centerY + 60, "공(空) 사상", "#10b981");
+                drawNode(ctx, centerX + 180, centerY + 60, "유(有) 사상", "#f59e0b");
+
+                ctx.strokeStyle = "#475569";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(centerX - 120, centerY - 60); ctx.lineTo(centerX + 120, centerY - 60); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(centerX - 120, centerY + 60); ctx.lineTo(centerX + 120, centerY + 60); ctx.stroke();
+
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("대립하는 각 부파 교리", centerX, centerY);
+            } else {
+                // Unified One Mind Node
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 70, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(245, 158, 11, 0.2)";
+                ctx.fill();
+
+                drawNode(ctx, centerX, centerY, "일심 (一心) · 화쟁 (和爭)", "#f59e0b", 40);
+
+                ctx.fillStyle = "#fef3c7";
+                ctx.font = "bold 13px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("“모든 대립하는 학설은 일심(一心)의 근원에서 조화된다”", centerX, centerY + 90);
+            }
+        }
+
+        function drawNode(ctx, x, y, text, color, r = 30) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(text, x, y + 4);
+        }
+
+        function triggerWonhyoHarmony() {
+            wonhyoUnified = !wonhyoUnified;
+            drawWonhyoCanvas();
+        }
+
+        // Zen Garden Interactivity
+        let zenStones = [];
+
+        function initZenCanvas() {
+            const canvas = document.getElementById('zenCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio || 800;
+            canvas.height = rect.height * window.devicePixelRatio || 400;
+
+            ctx.fillStyle = "#e2e8f0";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw default raked lines
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 3;
+            for (let y = 20; y < canvas.height; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Redraw stones
+            zenStones.forEach(st => {
+                ctx.fillStyle = "#334155";
+                ctx.beginPath(); ctx.arc(st.x, st.y, 20, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#15803d";
+                ctx.beginPath(); ctx.arc(st.x, st.y, 8, 0, Math.PI * 2); ctx.fill();
+            });
+        }
+
+        function clearZenCanvas() {
+            zenStones = [];
+            initZenCanvas();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const zCanvas = document.getElementById('zenCanvas');
+            if (zCanvas) {
+                let drawing = false;
+
+                const startDraw = () => { drawing = true; };
+                const stopDraw = () => { drawing = false; };
+                const doDraw = (e) => {
+                    if (!drawing) return;
+                    const ctx = zCanvas.getContext('2d');
+                    const rect = zCanvas.getBoundingClientRect();
+                    const scaleX = zCanvas.width / rect.width;
+                    const scaleY = zCanvas.height / rect.height;
+                    const x = (e.clientX || (e.touches && e.touches[0].clientX) - rect.left) * scaleX;
+                    const y = (e.clientY || (e.touches && e.touches[0].clientY) - rect.top) * scaleY;
+
+                    ctx.strokeStyle = "#94a3b8";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12, 0, Math.PI * 2);
+                    ctx.stroke();
+                };
+
+                zCanvas.addEventListener('mousedown', startDraw);
+                zCanvas.addEventListener('mouseup', stopDraw);
+                zCanvas.addEventListener('mousemove', doDraw);
+
+                zCanvas.addEventListener('click', (e) => {
+                    const rect = zCanvas.getBoundingClientRect();
+                    const scaleX = zCanvas.width / rect.width;
+                    const scaleY = zCanvas.height / rect.height;
+                    const x = (e.clientX - rect.left) * scaleX;
+                    const y = (e.clientY - rect.top) * scaleY;
+                    zenStones.push({ x, y });
+                    initZenCanvas();
+                });
+            }
+        });
+
+        /* ==========================================================================
+           6. REAL-TIME REPORT SCRAPING & INTEGRATION SYSTEM
+           ========================================================================== */
+        function scrapCurrentCity() {
+            const city = citiesData[state.selectedCity] || citiesData.changan;
+            addScrap({
+                id: Date.now(),
+                category: '도시 구법 기행',
+                title: `${city.name} - ${city.monk}`,
+                content: `• 교류 경로: ${city.routeType}\n• 대표 유산: ${city.heritage}\n• 탐구 핵심: ${city.point}`
+            });
+        }
+
+        function scrapCurrentArch() {
+            let title = '한국 산사 양식';
+            let content = '산지 지형과의 조화, 부드러운 앙곡 처마선, 화엄 장엄 오방색 단청 시공';
+            if (state.archStyle === 'china') {
+                title = '중국 황궁형 사찰 양식';
+                content = '대평원 정대칭 남북 중심축 배치, 황제 권력 대형 황색 기와 및 전탑·석굴 유산';
+            } else if (state.archStyle === 'japan') {
+                title = '일본 건산수 & 목조 양식';
+                content = '무채색 소목미, 물을 쓰지 않는 카레스산스이 젠 정원, 신불습합 도리이 구조';
+            }
+
+            addScrap({
+                id: Date.now(),
+                category: '생태·건축 비교',
+                title: title,
+                content: content
+            });
+        }
+
+        function scrapWonhyoSim() {
+            addScrap({
+                id: Date.now(),
+                category: '사상 체험 시뮬레이션',
+                title: '신라 원효의 화쟁(和爭) & 일심(一心)',
+                content: '공(空)과 유(有), 교종과 선종의 대립하는 학설을 배척하지 않고 일심(一心)이라는 원점에서 만나는 통불교적 통합 원리를 실습함.'
+            });
+        }
+
+        function scrapZenSim() {
+            addScrap({
+                id: Date.now(),
+                category: '사상 체험 시뮬레이션',
+                title: '일본 카레스산스이(枯山水) 젠 정원',
+                content: '흰 자갈 모래 위에 갈퀴로 물결선 패턴을 그리고 이끼 바위를 배치하며 선(禪) 미학을 체험함.'
+            });
+        }
+
+        function scrapSutraSim() {
+            addScrap({
+                id: Date.now(),
+                category: '문화 유산 탐구',
+                title: '중국 한역(漢譯) 역경 및 돈황 막고굴',
+                content: '범어 경전의 한자 번역 과정과 실크로드 관문 돈황 막고굴 장경동에서 발견된 신라 승려 혜초의 <왕오천축국전>의 세계사적 교류 가치를 확인함.'
+            });
+        }
+
+        function addScrap(item) {
+            if (state.reportData.scraps.some(s => s.title === item.title)) {
+                showScrapToast('이미 스크랩함에 추가된 노드입니다!');
+                return;
+            }
+            state.reportData.scraps.push(item);
+            updateScrapUI();
+            showScrapToast(`📌 [${item.category}] 노드가 보고서에 수집되었습니다!`);
+            playSingingBowl();
+        }
+
+        function deleteScrap(id) {
+            state.reportData.scraps = state.reportData.scraps.filter(s => s.id !== id);
+            updateScrapUI();
+        }
+
+        function clearScraps() {
+            state.reportData.scraps = [];
+            updateScrapUI();
+        }
+
+        function updateScrapUI() {
+            const badge = document.getElementById('scrapBadge');
+            if (badge) badge.innerText = state.reportData.scraps.length;
+
+            const scrapListContainer = document.getElementById('scrapListContainer');
+            const drawerScrapList = document.getElementById('drawerScrapList');
+            const docScrapsContainer = document.getElementById('docScrapsContainer');
+
+            const scrapHtml = state.reportData.scraps.length === 0 ? `
+                <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 text-center text-xs text-slate-500">
+                    아직 수집된 탐구 노드가 없습니다.<br>각 시뮬레이션 탭에서 '노트 스크랩' 버튼을 클릭해보세요!
+                </div>
+            ` : state.reportData.scraps.map(s => `
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1 relative group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">${s.category}</span>
+                        <button onclick="deleteScrap(${s.id})" class="text-slate-500 hover:text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <h5 class="text-xs font-bold text-slate-200 mt-1">${s.title}</h5>
+                    <p class="text-[11px] text-slate-400 leading-tight whitespace-pre-line">${s.content}</p>
+                </div>
+            `).join('');
+
+            if (scrapListContainer) scrapListContainer.innerHTML = scrapHtml;
+            if (drawerScrapList) drawerScrapList.innerHTML = scrapHtml;
+
+            if (docScrapsContainer) {
+                if (state.reportData.scraps.length === 0) {
+                    docScrapsContainer.innerHTML = `<div class="p-3 bg-slate-900/40 rounded-lg text-slate-500 text-center">시뮬레이션을 통해 노드를 수집하면 이곳에 분석 카드가 자동 연동됩니다.</div>`;
+                } else {
+                    docScrapsContainer.innerHTML = state.reportData.scraps.map((s, i) => `
+                        <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                            <div class="font-bold text-amber-300 flex items-center justify-between">
+                                <span>Card ${i+1}. [${s.category}] ${s.title}</span>
+                                <span class="text-[10px] text-slate-500">자동 수집됨</span>
+                            </div>
+                            <p class="text-slate-300 whitespace-pre-line leading-relaxed">${s.content}</p>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            calculateReportProgress();
+        }
+
+        function updateReportView() {
+            state.reportData.school = document.getElementById('infoSchool').value;
+            state.reportData.grade = document.getElementById('infoGrade').value;
+            state.reportData.number = document.getElementById('infoNumber').value;
+            state.reportData.name = document.getElementById('infoName').value;
+            state.reportData.date = document.getElementById('infoDate').value;
+
+            document.getElementById('docSchool').innerText = state.reportData.school || '미입력';
+            document.getElementById('docStudent').innerText = `${state.reportData.grade || ''} ${state.reportData.number || ''} ${state.reportData.name || '미입력'}`;
+            document.getElementById('docDate').innerText = state.reportData.date || '미입력';
+
+            calculateReportProgress();
+        }
+
+        function calculateReportProgress() {
+            let score = 0;
+            if (document.getElementById('infoName')?.value) score += 20;
+            if (state.reportData.scraps.length >= 1) score += 20;
+            if (state.reportData.scraps.length >= 3) score += 20;
+            if (document.getElementById('inputAnalysis')?.value.length > 20) score += 20;
+            if (document.getElementById('inputConclusion')?.value.length > 20) score += 20;
+
+            const tag = document.getElementById('reportProgressTag');
+            if (tag) tag.innerText = `작성 진행률 ${score}%`;
+        }
+
+        function autoFillExampleScraps() {
+            document.getElementById('infoSchool').value = '한국고등학교';
+            document.getElementById('infoGrade').value = '2학년 1반';
+            document.getElementById('infoNumber').value = '12번';
+            document.getElementById('infoName').value = '김역사';
+            document.getElementById('inputMotivation').value = state.reportData.motivation;
+            document.getElementById('inputAnalysis').value = state.reportData.analysis;
+            document.getElementById('inputConclusion').value = state.reportData.conclusion;
+
+            state.selectedCity = 'changan'; scrapCurrentCity();
+            state.selectedCity = 'dunhuang'; scrapCurrentCity();
+            state.archStyle = 'korea'; scrapCurrentArch();
+            state.archStyle = 'japan'; scrapCurrentArch();
+            scrapWonhyoSim();
+
+            updateReportView();
+            showScrapToast('✨ 예시 보고서 데이터가 자동으로 채워졌습니다.');
+        }
+
+        function toggleReportDrawer() {
+            const drawer = document.getElementById('reportDrawer');
+            if (drawer) drawer.classList.toggle('translate-x-full');
+        }
+
+        function showScrapToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 bg-amber-500 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl z-50 flex items-center space-x-2 animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-check-circle"></i><span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function copyPlannerReport() {
+            const text = `[2022 개정 동아시아 역사 기행 탐구 보고서]\n성명: ${state.reportData.name}\n학교: ${state.reportData.school}\n\n[수집 데이터]\n` +
+                state.reportData.scraps.map(s => `- ${s.title}: ${s.content}`).join('\n') +
+                `\n\n[분석소감]\n${document.getElementById('inputAnalysis')?.value}\n\n[결론]\n${document.getElementById('inputConclusion')?.value}`;
+
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            const btn = document.getElementById('copyReportBtn');
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check mr-1"></i> 복사 완료!`;
+                btn.classList.add('bg-emerald-500', 'text-white');
+                btn.classList.remove('bg-amber-500', 'text-slate-950');
+                setTimeout(() => { 
+                    btn.innerHTML = orig; 
+                    btn.classList.remove('bg-emerald-500', 'text-white');
+                    btn.classList.add('bg-amber-500', 'text-slate-950');
+                }, 2000);
+            }
+        }
+
+        /* ==========================================================================
+           6-B. GOOGLE SHEETS SUBMISSION INTEGRATION
+           ========================================================================== */
+        function saveScriptUrl() {
+            const url = document.getElementById('scriptUrlInput').value;
+            if (url && url.startsWith('https://script.google.com/')) {
+                localStorage.setItem('googleAppsScriptUrl', url);
+                showScrapToast('✅ 구글 시트 연동 URL이 저장되었습니다.');
+            } else {
+                showScrapToast('⚠️ 올바른 구글 Apps Script 웹앱 URL을 입력해주세요.');
+            }
+        }
+
+        function copyAppsScriptCode() {
+            const code = document.getElementById('appsScriptCode').innerText;
+            const textArea = document.createElement("textarea");
+            textArea.value = code;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showScrapToast('✅ Apps Script 코드가 복사되었습니다.');
+        }
+
+        function submitToGoogleSheet() {
+            const scriptUrl = localStorage.getItem('googleAppsScriptUrl');
+            
+            if (!scriptUrl) {
+                showScrapToast('⚠️ 교사용 대시보드에서 구글 시트 연동 설정이 필요합니다.');
+                return;
+            }
+
+            if (!state.reportData.name || !state.reportData.school) {
+                showScrapToast('⚠️ 상단의 학교, 학년/반, 학번, 이름을 모두 입력해주세요!');
+                return;
+            }
+
+            showScrapToast('⏳ 구글 시트로 데이터를 전송 중입니다...');
+
+            const formData = new FormData();
+            formData.append('school', state.reportData.school);
+            formData.append('grade', state.reportData.grade);
+            formData.append('number', state.reportData.number);
+            formData.append('name', state.reportData.name);
+            formData.append('scraps', state.reportData.scraps.length);
+            formData.append('quizScore', state.quizScore);
+            formData.append('motivation', document.getElementById('inputMotivation')?.value || '');
+            formData.append('analysis', document.getElementById('inputAnalysis')?.value || '');
+            formData.append('conclusion', document.getElementById('inputConclusion')?.value || '');
+
+            fetch(scriptUrl, { method: 'POST', body: formData, mode: 'no-cors' })
+                .then(() => {
+                    showScrapToast('🎉 구글 시트로 보고서 제출이 완료되었습니다!');
+                })
+                .catch(error => {
+                    showScrapToast('❌ 전송 실패: 네트워크 상태를 확인해주세요.');
+                });
+        }
+
+        /* ==========================================================================
+           7. WEB AUDIO SINGING BOWL SYNTHESIZER
+           ========================================================================== */
+        function playSingingBowl() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(261.63, ctx.currentTime); // C4 sound
+
+                gain.gain.setValueAtTime(0.8, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.5);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 3.5);
+            } catch (e) {
+                console.log("Audio play blocked or unsupported");
+            }
+        }
+
+        /* ==========================================================================
+           8. CURRICULUM QUIZ ENGINE
+           ========================================================================== */
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            if (!container) return;
+
+            const q = quizData[state.quizIndex];
+            const progress = document.getElementById('quizProgress');
+            if (progress) progress.innerText = `문제 ${state.quizIndex + 1} / ${quizData.length}`;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-100 leading-snug">${q.q}</h3>
+                    <div class="space-y-2">
+                        ${q.opts.map((opt, idx) => `
+                            <button onclick="selectQuizOption(${idx})" class="w-full text-left p-3.5 bg-slate-900 hover:bg-slate-800/90 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 transition font-medium">
+                                ${idx + 1}. ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectQuizOption(optIdx) {
+            const q = quizData[state.quizIndex];
+            const isCorrect = optIdx === q.ans;
+            if (isCorrect) state.quizScore += 20;
+
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="p-4 ${isCorrect ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-200' : 'bg-red-950/50 border-red-500/40 text-red-200'} border rounded-2xl space-y-2">
+                        <div class="flex items-center space-x-2 font-bold text-sm">
+                            <i class="fa-solid ${isCorrect ? 'fa-circle-check text-emerald-400' : 'fa-circle-xmark text-red-400'}"></i>
+                            <span>${isCorrect ? '정답입니다!' : '아쉽네요, 오답입니다.'}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">${q.exp}</p>
+                    </div>
+
+                    ${state.quizIndex < quizData.length - 1 ? `
+                        <button onclick="nextQuizQuestion()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition">
+                            다음 문제 풀기
+                        </button>
+                    ` : `
+                        <div class="p-4 bg-slate-900 rounded-2xl text-center space-y-3">
+                            <h4 class="text-lg font-bold text-amber-200">퀴즈 완료! 최종 점수: ${state.quizScore}점</h4>
+                            <button onclick="resetQuiz()" class="px-4 py-2 bg-slate-800 text-amber-300 rounded-xl text-xs font-bold hover:bg-slate-700">
+                                다시 도전하기
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function nextQuizQuestion() {
+            state.quizIndex++;
+            renderQuiz();
+        }
+
+        function resetQuiz() {
+            state.quizIndex = 0;
+            state.quizScore = 0;
+            renderQuiz();
+        }
+
+        /* ==========================================================================
+           9. HELP MODAL CONTROLS
+           ========================================================================== */
+        function openHelpModal() {
+            document.getElementById('helpModal')?.classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal')?.classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           10. TEACHER DASHBOARD LOGIC
+           ========================================================================== */
+        function openTeacherAuth() {
+            const pwdInput = document.getElementById('teacherPwd');
+            if (pwdInput) pwdInput.value = '';
+            document.getElementById('teacherAuthError')?.classList.add('hidden');
+            document.getElementById('teacherAuthModal')?.classList.remove('hidden');
+            setTimeout(() => pwdInput?.focus(), 100);
+        }
+
+        function closeTeacherAuth() {
+            document.getElementById('teacherAuthModal')?.classList.add('hidden');
+        }
+
+        function verifyTeacherAuth() {
+            const pwd = document.getElementById('teacherPwd')?.value;
+            if (pwd === '123456') {
+                closeTeacherAuth();
+                switchTab('teacher');
+                showScrapToast('👨‍🏫 교사용 대시보드 관리자 모드로 전환되었습니다.');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Load saved script URL if exists
+                const savedUrl = localStorage.getItem('googleAppsScriptUrl');
+                if(savedUrl) document.getElementById('scriptUrlInput').value = savedUrl;
+
+            } else {
+                const err = document.getElementById('teacherAuthError');
+                if (err) err.classList.remove('hidden');
+                
+                // Shake effect on error
+                const modal = document.querySelector('#teacherAuthModal > div');
+                modal.classList.add('translate-x-2');
+                setTimeout(() => modal.classList.replace('translate-x-2', '-translate-x-2'), 100);
+                setTimeout(() => modal.classList.replace('-translate-x-2', 'translate-x-2'), 200);
+                setTimeout(() => modal.classList.remove('translate-x-2', '-translate-x-2'), 300);
+            }
+        }
+
+        function viewMockStudentReport(studentName) {
+            showScrapToast(`📄 ${studentName} 학생의 보고서 데이터를 불러오는 중입니다...`);
+            // In a production environment, this would fetch data from a backend server.
+        }
+
+        function downloadStudentDataCSV() {
+            // 현재 대시보드 테이블에 렌더링된 Mock Data 기반 CSV 생성
+            const mockStudents = [
+                { idName: "20101 강역사", scraps: "5개 완료", score: "100점", status: "제출 완료 (05/24)" },
+                { idName: "20102 김동아", scraps: "3개 (진행중)", score: "80점", status: "작성 중" },
+                { idName: "20103 박불교", scraps: "0개 미참여", score: "미응시", status: "미제출" }
+            ];
+
+            // 엑셀에서 한글 깨짐을 방지하기 위한 UTF-8 BOM 추가
+            let csvContent = "\uFEFF";
+            csvContent += "학번/이름,탐구 노트 수집,퀴즈 성적,보고서 제출 상태\n"; // 헤더
+
+            mockStudents.forEach(student => {
+                // 쉼표(,)가 포함된 데이터를 대비하여 쌍따옴표로 감싸기
+                const row = [
+                    `"${student.idName}"`,
+                    `"${student.scraps}"`,
+                    `"${student.score}"`,
+                    `"${student.status}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            // Blob 객체 생성 및 URL 매핑
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // 임시 링크 생성 후 클릭 이벤트를 통해 다운로드 트리거
+            const link = document.createElement("a");
+            const dateStr = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `학생_수행평가_현황_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            
+            // 메모리 정리
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showScrapToast('📊 학생 데이터 CSV 다운로드가 완료되었습니다.');
+        }
+
+        /* ==========================================================================
+           11. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function() {
+            // Render Initial Visuals
+            drawTravelMap();
+            renderCityInfoPanel();
+            updateArchDetails();
+            drawTempleArchitecture();
+            drawWonhyoCanvas();
+            renderQuiz();
+            updateScrapUI();
+
+            const motivationInput = document.getElementById('inputMotivation');
+            if (motivationInput) motivationInput.value = state.reportData.motivation;
+
+            // Handle Screen Resizing
+            window.addEventListener('resize', () => {
+                if (state.activeTab === 'map-route') drawTravelMap();
+                if (state.activeTab === 'architecture') drawTempleArchitecture();
+                if (state.activeTab === 'culture-sim' && state.subSim === 'wonhyo') drawWonhyoCanvas();
+                if (state.activeTab === 'culture-sim' && state.subSim === 'zen') initZenCanvas();
+            });
+        };
+    </script>
+</body>
+</html>
